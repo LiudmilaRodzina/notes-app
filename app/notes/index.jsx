@@ -14,7 +14,6 @@ import NoteList from '@/components/NoteList';
 
 const NoteScreen = () => {
   const [notes, setNotes] = useState([]);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [newNote, setNewNote] = useState('');
   const [loading, setLoading] = useState(true);
@@ -54,6 +53,24 @@ const NoteScreen = () => {
     setModalVisible(false);
   };
 
+  const editNote = async (id, newText) => {
+    if (!newText.trim()) {
+      Alert.alert('Error', 'Note text cannot be empty');
+      return;
+    }
+
+    const response = await noteService.updateNote(id, newText);
+    if (response.error) {
+      Alert.alert('Error', response.error);
+    } else {
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.$id === id ? { ...note, text: response.data.text } : note
+        )
+      );
+    }
+  };
+
   const deleteNote = async (id) => {
     Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [
       {
@@ -82,7 +99,7 @@ const NoteScreen = () => {
       ) : (
         <>
           {error && <Text style={styles.errorText}>{error}</Text>}
-          <NoteList notes={notes} onDelete={deleteNote} />
+          <NoteList notes={notes} onDelete={deleteNote} onEdit={editNote} />
         </>
       )}
 
