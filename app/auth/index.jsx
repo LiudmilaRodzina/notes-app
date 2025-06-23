@@ -20,37 +20,52 @@ const AuthScreen = () => {
   const [error, setError] = useState(false);
 
   const handleAuth = async () => {
+    setError('');
+
     if (!email.trim() || !password.trim()) {
       setError('Email and password are required');
       return;
     }
 
-    if (isRegistering && password !== confirmPassword) {
-      setError('Passwords do not match');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
       return;
     }
-
-    let response;
 
     if (isRegistering) {
-      response = await register(email, password);
-    } else {
-      response = await login(email, password);
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
     }
 
-    if (response?.error) {
-      Alert.alert('Error', response.error);
-      return;
-    }
+    try {
+      const response = isRegistering
+        ? await register(email, password)
+        : await login(email, password);
 
-    router.replace('/notes');
+      if (response?.error) {
+        if (response.error.includes('already exists')) {
+          setError('An account with this email already exists');
+        } else {
+          Alert.alert('Error', response.error);
+        }
+        return;
+      }
+
+      router.replace('/notes');
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred');
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>{isRegistering ? 'Sign Up' : 'Login'}</Text>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <View style={styles.errorContainer}>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+      </View>
 
       <TextInput
         style={styles.input}
@@ -112,7 +127,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 5,
     color: '#333',
   },
   input: {
@@ -131,7 +146,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: '100%',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 30,
   },
   buttonText: {
     color: '#fff',
@@ -143,9 +158,13 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontSize: 16,
   },
+  errorContainer: {
+    height: 24,
+    marginBottom: 20,
+    justifyContent: 'center',
+  },
   error: {
     color: 'red',
-    marginBottom: 10,
     fontSize: 16,
   },
 });
