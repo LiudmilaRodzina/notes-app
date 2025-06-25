@@ -16,7 +16,6 @@ import {
 const NoteScreen = () => {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-
   const [notes, setNotes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newNote, setNewNote] = useState('');
@@ -37,7 +36,7 @@ const NoteScreen = () => {
 
   const fetchNotes = async () => {
     setLoading(true);
-    const response = await noteService.getNotes();
+    const response = await noteService.getNotes(user.$id);
 
     if (response.error) {
       setError(response.error);
@@ -53,7 +52,7 @@ const NoteScreen = () => {
   const addNote = async () => {
     if (newNote.trim() === '') return;
 
-    const response = await noteService.addNote(newNote);
+    const response = await noteService.addNote(newNote, user.$id);
 
     if (response.error) {
       Alert.alert('Error', response.error);
