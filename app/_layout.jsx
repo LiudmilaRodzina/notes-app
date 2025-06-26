@@ -23,7 +23,7 @@ const RootLayout = () => {
           headerTintColor: '#fff',
           headerTitleAlign: 'center',
           headerTitleStyle: {
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: 'bold',
           },
           headerRight: () => <HeaderLogout />,
